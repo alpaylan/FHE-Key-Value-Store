@@ -55,7 +55,9 @@ As padding is not implemented, the key and value sizes must be a multiple of the
 
 ## Tutorial
 
-This tutorial will go over the commented canonical implementation of the database.
+There are two tutorials in this repository. One is this tutorial section, which is more concise and tries not to go into the details of the implementation as much as possible. The other is the `Tutorial.ipynb` file, which is an interactive tutorial that separates the canonical implementation into many small jupyter notebook cells, provides relevant information and allows the reader to tweak parameters easily.
+
+This non-interactive tutorial will go over the commented canonical implementation of the database by neglecting some of the details of the implementation.
 
 ### Defining The State and Indexers
 
@@ -65,11 +67,11 @@ Indexers are used to extract bits from the state for flag, key and value.
 
 State is defines with the following tensor shape:
 
-| Flag Size | Key Size | Value Size |
-| --- | --- | --- |
-| 1         | 32/4 = 8 | 32/4 = 8   |
-| 1         | 8/4 = 2  | 8/4 = 2    |
-| 1         | 4/4 = 1  | 4/4 = 1    |
+| Flag Size | Key Size | Number of Key Chunks | Value Size | Number of Value Chunks |
+| ---       | ---      | ---                  | ---        | ---                    |
+| 1         | 32       | 32/4 = 8             | 32         | 32/4 = 8               |
+| 1         | 8        | 8/4 = 2              | 16         | 16/4 = 4               |
+| 1         | 4        | 4/4 = 1              | 4          | 4/4 = 1                |
 
 The following code defines the state shape, and the indexers for each part of the state.
 
@@ -94,17 +96,19 @@ Below are examples of the encode/decode functions.
 
 #### Encode
 
-| Input(Integer) | Bit-Width | Result(Numpy Array) |
-| --- | --- | --- |
-| 10 | 4 | [1, 0, 1, 0] |
-| 11 | 5 | [0, 1, 0, 1, 1] |
+| Function Call | Input(Integer) | Array-Width | Result(Numpy Array) |
+| --- | --- | --- | --- |
+| encode(25, 4) | 25 | 4 | [0, 0, 1, 9] |
+| encode(40, 4) | 40 | 4 | [0, 0, 2, 8] |
+| encode(11, 3) | 11 | 3 | [0, 0, 11] |
 
 #### Decode
 
-| Input(Numpy Array) | Result(Integer) |
-| --- | --- |
-| [1, 0, 1, 0] | 10 |
-| [0, 1, 0, 1, 1] | 11 |
+| Function Call | Input(Numpy Array) | Result(Integer) |
+| --- | --- | --- |
+| decode([0, 0, 1, 9]) | [0, 0, 1, 9] | 25 |
+| decode([0, 0, 2, 8]) | [0, 0, 2, 8] | 40 |
+| decode([0, 0, 11]) | [0, 0, 11] | 11 |
 
 ### Defining The Required Lookup Tables
 
@@ -263,6 +267,14 @@ configuration = cnp.Configuration(
             insecure_key_cache_location=".keys",
             # virtual=True,
         )
+```
+
+As virtual circuits cannot generate keys, you should also comment the `self._<operation>_circuit.keygen()` lines inside the `__init__` function.
+
+Example of the keygen is below:
+
+```python
+self._insert_circuit.keygen()
 ```
 
 ## Conclusion
