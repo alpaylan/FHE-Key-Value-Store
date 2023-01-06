@@ -130,7 +130,15 @@ def keep_selected(value, selected):
 keep_selected_lut = cnp.LookupTable([0 for _ in range(16)] + [i for i in range(16)])
 ```
 
-Selected is pushed as the first bit of the value, and the lookup table is used to extract the value.
+We can then encapsulate the function logic as given below.
+
+```python
+def keep_selected_with_tlu(value, selected):
+  packed = (2**CHUNK_SIZE ) * selected + value
+  return keep_selected_lut[packed]
+```
+
+Selected is pushed as the most significant bit of the value, and the lookup table is used to extract the value.
 
 Below are some examples from the lookup table.
 
@@ -179,7 +187,6 @@ The input sets are used to initialize the circuits with the correct parameters. 
 The input set for the query circuit:
 
 ```python
-
 inputset_binary = [
     (
         np.zeros(STATE_SHAPE, dtype=np.int64), # state
@@ -210,9 +217,9 @@ The compiler is then used to compile the circuit to use for the database operati
 
 ```python
 insert_compiler = cnp.Compiler(
-            _insert_impl,
-            {"state": "encrypted", "key": "encrypted", "value": "encrypted"}
-        )
+    _insert_impl,
+    {"state": "encrypted", "key": "encrypted", "value": "encrypted"}
+)
 self._insert_circuit = insert_compiler.compile(inputset_ternary, configuration)
 ```
 
@@ -262,11 +269,11 @@ Virtual circuits can be enabled by uncommenting the last line of the configurati
 
 ```python
 configuration = cnp.Configuration(
-            enable_unsafe_features=True,
-            use_insecure_key_cache=True,
-            insecure_key_cache_location=".keys",
-            # virtual=True,
-        )
+    enable_unsafe_features=True,
+    use_insecure_key_cache=True,
+    insecure_key_cache_location=".keys",
+    # virtual=True,
+)
 ```
 
 As virtual circuits cannot generate keys, you should also comment the `self._<operation>_circuit.keygen()` lines inside the `__init__` function.
