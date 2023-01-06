@@ -158,7 +158,7 @@ As a concise function, we can also write it as:
 
 The circuit implementation functions are used to implement the key-value store circuits. Circuits are implemented using the set of operations supported by the library, and the lookup table defined above.
 
-For more details, reader is advised to read the commented operation to not clutter this tutorial. The commented operation can be found in the `KVStore_commented.py` file.
+For more details, reader is advised to read the commented operation or follow the detailed interactive tutorial at the `Tutorial.ipynb` file to not clutter this tutorial. The commented code can be found in the `KVStore_commented.py` file.
 
 ### Defining The Database Interface
 
